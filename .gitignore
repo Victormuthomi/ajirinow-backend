@@ -1,0 +1,47 @@
+/media/
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+.env/
+.env.*  # For dotenv config files
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+local_settings.py
+*.mo
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# PostgreSQL dump
+*.dump
+*.sql
+
+# Node (if you have frontend in the same repo)
+node_modules/
+dist/
+build/
+
+# React or Vite frontend builds (optional)
+*.lock
+*.bak
+*.swp
+
