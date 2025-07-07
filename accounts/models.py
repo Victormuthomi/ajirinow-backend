@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class UserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
@@ -38,4 +40,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.name} ({self.role})"
+
+class FundiProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='fundi_profile')
+    skills = models.TextField()
+    location = models.CharField(max_length=100)
+    is_available = models.BooleanField(default=True)
+    show_contact = models.BooleanField(default=True)
+    rate_note = models.TextField(blank=True, help_text="e.g. Ksh 1500/day, negotiable")
+
+    def __str__(self):
+        return f"Fundi Profile: {self.user.name}"
+
+class ClientProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='client_profile')
+    role_note = models.CharField(max_length=100, blank=True, help_text="e.g. Contractor, Business Owner")
+
+    def __str__(self):
+        return f"Client Profile: {self.user.name}"
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        if instance.role == 'fundi' and not hasattr(instance, 'fundi_profile'):
+            FundiProfile.objects.create(user=instance)
+        elif instance.role == 'client' and not hasattr(instance, 'client_profile'):
+            ClientProfile.objects.create(user=instance)
 
