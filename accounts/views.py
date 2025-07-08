@@ -8,6 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from .models import FundiProfile, User
 from .serializers import FundiProfileSerializer
 from django.shortcuts import get_object_or_404
+from datetime import timedelta
+from django.utils import timezone
+from payments.models import Payment
 
 
 class RegisterView(APIView):
@@ -17,6 +20,7 @@ class RegisterView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LoginView(APIView):
     def post(self, request):
@@ -63,12 +67,32 @@ class FundiDeleteView(APIView):
         return Response({"message": "Account deleted"}, status=204)
 
 
-# Public: List all fundis
+# ✅ Updated: Public Fundi Listing (Trial or Paid)
 class FundiPublicList(APIView):
     def get(self, request):
-        profiles = FundiProfile.objects.filter(user__role='fundi')
-        data = []
+        now = timezone.now()
+        profiles = FundiProfile.objects.select_related('user').filter(user__role='fundi')
+        visible_fundis = []
+
         for profile in profiles:
+            user = profile.user
+            # Show if within 7-day free trial
+            if (now - user.date_joined) <= timedelta(days=7):
+                visible_fundis.append(profile)
+                continue
+
+            # Show if fundi has completed payment within last 30 days
+            last_payment = Payment.objects.filter(
+                user=user,
+                purpose='subscription',
+                status='Completed'
+            ).order_by('-created_at').first()
+
+            if last_payment and (now - last_payment.created_at) <= timedelta(days=30):
+                visible_fundis.append(profile)
+
+        data = []
+        for profile in visible_fundis:
             data.append({
                 "id": profile.user.id,
                 "name": profile.user.name,
@@ -105,7 +129,6 @@ class ClientRegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
 
-
 # Client Login View
 class ClientLoginView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -134,3 +157,4 @@ class ClientMeView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return self.request.user
+

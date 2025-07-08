@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 class UserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
@@ -32,6 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
+
+    subscription_end = models.DateField(null=True, blank=True)  # ✅ Added
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['name', 'role']
