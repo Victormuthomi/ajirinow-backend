@@ -22,6 +22,16 @@ PURPOSE_AMOUNTS = {
 }
 
 class STKPushView(APIView):
+    """
+    POST: Initiates an STK Push to the user's phone using M-Pesa.
+    
+    Required fields:
+    - purpose: "subscription", "post_job", or "post_ad"
+    - phone: phone number to send the push to
+
+    Returns:
+    - checkout_id and payment_id if successful
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -71,7 +81,15 @@ class STKPushView(APIView):
 @csrf_exempt
 @api_view(['POST'])
 def mpesa_callback(request):
-    """M-Pesa callback webhook to update payment + activate features"""
+    """
+    POST: Receives M-Pesa callback from Safaricom and updates the payment status.
+
+    Triggered by Safaricom once the STK push is approved or rejected.
+
+    Updates:
+    - Payment status
+    - Activates job/ad/subscription if successful
+    """
     data = request.data
     body = data.get('Body', {}).get('stkCallback', {})
     merchant_request_id = body.get('MerchantRequestID')
@@ -121,7 +139,6 @@ def mpesa_callback(request):
                     ad.is_active = True
                     ad.expires_at = timezone.now() + timedelta(days=7)
                     ad.save()
-                    pass
 
         else:
             payment.status = 'Failed'

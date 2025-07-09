@@ -8,13 +8,25 @@ from django.http import JsonResponse
 from .utils import lipa_na_mpesa_online
 from payments.models import Payment
 from jobs.models import Job
-from ads.models import Ad  # ✅ Added for ad activation
+from ads.models import Ad
 from accounts.models import User
 from django.utils import timezone
 from datetime import timedelta
 
 
 class STKPushView(APIView):
+    """
+    POST: Initiate M-Pesa STK Push
+
+    Required:
+    - phone: Phone number in format 2547XXXXXXXX
+    - amount: Integer amount to charge
+    - purpose: One of ['subscription', 'post_job', 'post_ad']
+
+    Returns:
+    - M-Pesa API response and logs payment as pending
+    - For 'post_job', attempts to activate the most recent unpaid job
+    """
     def post(self, request):
         phone = request.data.get("phone")
         amount = request.data.get("amount")
@@ -32,7 +44,6 @@ class STKPushView(APIView):
             if result.get("ResponseCode") == "0":
                 user = request.user if request.user.is_authenticated else None
 
-                # Create payment entry
                 payment = Payment.objects.create(
                     user=user,
                     phone=phone,
@@ -44,9 +55,10 @@ class STKPushView(APIView):
                     purpose=purpose,
                 )
 
-                # Link to latest job and activate
                 if purpose == "post_job" and user:
-                    job = Job.objects.filter(client=user, is_active=False, payment__isnull=True).order_by('-created_at').first()
+                    job = Job.objects.filter(
+                        client=user, is_active=False, payment__isnull=True
+                    ).order_by('-created_at').first()
                     if job:
                         job.payment = payment
                         job.is_active = True
@@ -62,7 +74,13 @@ class STKPushView(APIView):
 @csrf_exempt
 @api_view(['POST'])
 def mpesa_callback(request):
-    """Handles M-Pesa STK Push Callback"""
+    """
+    M-Pesa Callback Endpoint (Safaricom calls this)
+
+    Automatically:
+    - Marks payment as 'Completed' or 'Failed'
+    - Activates job or ad if payment purpose matches and is valid
+    """
     data = request.data
 
     body = data.get('Body', {}).get('stkCallback', {})
@@ -85,7 +103,6 @@ def mpesa_callback(request):
             payment.amount = amount
             payment.save()
 
-            # ✅ Activate job if applicable
             if payment.purpose == 'post_job':
                 job = Job.objects.filter(client=payment.user, payment=payment).first()
                 if job:
@@ -93,9 +110,10 @@ def mpesa_callback(request):
                     job.expires_at = timezone.now() + timedelta(weeks=12)
                     job.save()
 
-            # ✅ Activate ad if applicable
             elif payment.purpose == 'post_ad':
-                ad = Ad.objects.filter(client=payment.user, is_active=False, payment__isnull=True).order_by('-created_at').first()
+                ad = Ad.objects.filter(
+                    client=payment.user, is_active=False, payment__isnull=True
+                ).order_by('-created_at').first()
                 if ad:
                     ad.payment = payment
                     ad.is_active = True
@@ -108,7 +126,7 @@ def mpesa_callback(request):
             payment.save()
 
     except Payment.DoesNotExist:
-        pass  # optionally log this
+        pass  # Optionally log this
 
     return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
 

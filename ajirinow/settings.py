@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'jobs',
     'ads',
     'payments',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

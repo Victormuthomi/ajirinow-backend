@@ -14,6 +14,9 @@ from payments.models import Payment
 
 
 class RegisterView(APIView):
+    """
+    Register a new user (fundi or client).
+    """
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -23,6 +26,9 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    """
+    Login for fundis or clients. Returns authentication token.
+    """
     def post(self, request):
         phone = request.data.get('phone_number')
         password = request.data.get('password')
@@ -34,8 +40,10 @@ class LoginView(APIView):
         return Response({'error': 'Invalid credentials'}, status=400)
 
 
-# GET or UPDATE own profile
 class FundiProfileView(APIView):
+    """
+    Get or update the authenticated fundi's profile.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -56,8 +64,10 @@ class FundiProfileView(APIView):
         return Response(serializer.errors, status=400)
 
 
-# DELETE fundi account
 class FundiDeleteView(APIView):
+    """
+    Delete the authenticated fundi's account.
+    """
     permission_classes = [IsAuthenticated]
 
     def delete(self, request):
@@ -67,8 +77,10 @@ class FundiDeleteView(APIView):
         return Response({"message": "Account deleted"}, status=204)
 
 
-# ✅ Updated: Public Fundi Listing (Trial or Paid)
 class FundiPublicList(APIView):
+    """
+    List all visible fundis (on trial or paid within 30 days).
+    """
     def get(self, request):
         now = timezone.now()
         profiles = FundiProfile.objects.select_related('user').filter(user__role='fundi')
@@ -76,12 +88,10 @@ class FundiPublicList(APIView):
 
         for profile in profiles:
             user = profile.user
-            # Show if within 7-day free trial
             if (now - user.date_joined) <= timedelta(days=7):
                 visible_fundis.append(profile)
                 continue
 
-            # Show if fundi has completed payment within last 30 days
             last_payment = Payment.objects.filter(
                 user=user,
                 purpose='subscription',
@@ -105,8 +115,10 @@ class FundiPublicList(APIView):
         return Response(data)
 
 
-# Public: View single fundi
 class FundiPublicDetail(APIView):
+    """
+    Retrieve public info for a specific fundi.
+    """
     def get(self, request, pk):
         user = get_object_or_404(User, id=pk, role='fundi')
         profile = user.fundi_profile
@@ -122,15 +134,19 @@ class FundiPublicDetail(APIView):
         return Response(data)
 
 
-# Client Registration View
 class ClientRegisterView(generics.CreateAPIView):
+    """
+    Register a new client.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
 
-# Client Login View
 class ClientLoginView(APIView):
+    """
+    Login for client. Returns authentication token.
+    """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -143,15 +159,19 @@ class ClientLoginView(APIView):
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-# List All Clients
 class ClientListView(generics.ListAPIView):
+    """
+    Publicly list all registered clients.
+    """
     queryset = User.objects.filter(role='client')
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
 
-# Logged-In Client: View, Update, Delete
 class ClientMeView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete authenticated client account.
+    """
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
