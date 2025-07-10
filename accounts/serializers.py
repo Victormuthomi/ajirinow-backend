@@ -3,9 +3,26 @@ from .models import User, FundiProfile, ClientProfile
 
 
 class FundiProfileSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="user.name", read_only=True)
+    id_number = serializers.CharField(source="user.id_number", read_only=True)  # ✅
+    is_active = serializers.BooleanField(source="user.is_active", read_only=True)
+    subscription_end = serializers.DateField(source="user.subscription_end", read_only=True)
+    phone_number = serializers.CharField(source="user.phone_number", read_only=True)
+
     class Meta:
         model = FundiProfile
-        fields = ['skills', 'location', 'is_available', 'show_contact', 'rate_note']
+        fields = [
+            'skills',
+            'location',
+            'is_available',
+            'show_contact',
+            'rate_note',
+            'name',              # ✅ from related user
+            'is_active',
+            'phone_number',
+             'id_number', # ✅ from related user
+            'subscription_end',  # ✅ from related user
+        ]
 
 
 class ClientProfileSerializer(serializers.ModelSerializer):
