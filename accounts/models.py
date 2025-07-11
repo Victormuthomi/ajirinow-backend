@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
+from datetime import timedelta
 
 class UserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
@@ -34,10 +33,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
 
+    subscription_end = models.DateField(null=True, blank=True)
+
+    # ✅ Trial-related fields
+    on_trial = models.BooleanField(default=True)
     trial_started = models.DateTimeField(null=True, blank=True)
     trial_ends = models.DateTimeField(null=True, blank=True)
-
-    subscription_end = models.DateField(null=True, blank=True)  # ✅ Added
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['name', 'role']
@@ -65,12 +66,19 @@ class ClientProfile(models.Model):
     def __str__(self):
         return f"Client Profile: {self.user.name}"
 
+# ✅ Signal to auto-create profiles and set trial
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        if instance.role == 'fundi' and not hasattr(instance, 'fundi_profile'):
+        if instance.role == 'fundi':
             FundiProfile.objects.create(user=instance)
-        elif instance.role == 'client' and not hasattr(instance, 'client_profile'):
+            instance.trial_started = timezone.now()
+            instance.trial_ends = instance.trial_started + timedelta(days=7)
+            instance.on_trial = True
+            instance.save()
+        elif instance.role == 'client':
             ClientProfile.objects.create(user=instance)
 

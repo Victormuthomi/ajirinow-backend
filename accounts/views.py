@@ -77,9 +77,10 @@ class FundiDeleteView(APIView):
         return Response({"message": "Account deleted"}, status=204)
 
 
+
 class FundiPublicList(APIView):
     """
-    List all visible fundis (on trial or paid within 30 days).
+    List all visible fundis (on trial or subscribed in the last 30 days).
     """
     def get(self, request):
         now = timezone.now()
@@ -88,10 +89,18 @@ class FundiPublicList(APIView):
 
         for profile in profiles:
             user = profile.user
-            if (now - user.date_joined) <= timedelta(days=7):
+
+            # ✅ 1. If still on trial, and trial is not expired
+            if user.on_trial and user.trial_ends and user.trial_ends >= now:
                 visible_fundis.append(profile)
                 continue
 
+            # ✅ 2. If trial has expired, deactivate on_trial
+            if user.on_trial and user.trial_ends and user.trial_ends < now:
+                user.on_trial = False
+                user.save()
+
+            # ✅ 3. Check if payment was made in the last 30 days
             last_payment = Payment.objects.filter(
                 user=user,
                 purpose='subscription',
@@ -113,7 +122,6 @@ class FundiPublicList(APIView):
                 "phone_number": profile.user.phone_number if profile.show_contact else None,
             })
         return Response(data)
-
 
 class FundiPublicDetail(APIView):
     """

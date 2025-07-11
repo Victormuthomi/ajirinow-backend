@@ -1,13 +1,16 @@
 from rest_framework import serializers
 from .models import User, FundiProfile, ClientProfile
 
-
 class FundiProfileSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="user.name", read_only=True)
-    id_number = serializers.CharField(source="user.id_number", read_only=True)  # ✅
+    id_number = serializers.CharField(source="user.id_number", read_only=True)
     is_active = serializers.BooleanField(source="user.is_active", read_only=True)
     subscription_end = serializers.DateField(source="user.subscription_end", read_only=True)
     phone_number = serializers.CharField(source="user.phone_number", read_only=True)
+
+    # ✅ Trial-related
+    on_trial = serializers.BooleanField(source="user.on_trial", read_only=True)
+    trial_ends = serializers.DateTimeField(source="user.trial_ends", read_only=True)
 
     class Meta:
         model = FundiProfile
@@ -17,19 +20,19 @@ class FundiProfileSerializer(serializers.ModelSerializer):
             'is_available',
             'show_contact',
             'rate_note',
-            'name',              # ✅ from related user
-            'is_active',
+            'name',
+            'id_number',
             'phone_number',
-             'id_number', # ✅ from related user
-            'subscription_end',  # ✅ from related user
+            'is_active',
+            'subscription_end',
+            'on_trial',
+            'trial_ends',
         ]
-
 
 class ClientProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientProfile
         fields = ['role_note']
-
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
@@ -57,11 +60,9 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        # Pop nested profile data
         client_profile_data = validated_data.pop('client_profile', None)
         fundi_profile_data = validated_data.pop('fundi_profile', None)
 
-        # Update User fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
