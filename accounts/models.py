@@ -34,6 +34,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
 
+    trial_started = models.DateTimeField(null=True, blank=True)
+    trial_ends = models.DateTimeField(null=True, blank=True)
+
     subscription_end = models.DateField(null=True, blank=True)  # ✅ Added
 
     USERNAME_FIELD = 'phone_number'
