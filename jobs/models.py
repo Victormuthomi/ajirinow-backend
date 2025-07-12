@@ -15,6 +15,7 @@ class Job(models.Model):
     is_filled = models.BooleanField(default=False)
     payment = models.ForeignKey(Payment, null=True, blank=True, on_delete=models.SET_NULL)
 
+
     def activate(self):
         self.is_active = True
         self.expires_at = timezone.now() + timedelta(weeks=12)

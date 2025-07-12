@@ -2,18 +2,20 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
+
 from .models import Job
 from .serializers import JobSerializer
 from payments.models import Payment
 
+
 class JobListCreateView(generics.ListCreateAPIView):
     """
-    GET: 
-    - Fundis (with active subscription or trial): View all active jobs.
-    - Clients/Advertisers: View their posted jobs.
+    GET:
+    - Fundis (with active subscription or trial): view all active jobs.
+    - Clients/Advertisers: view only their own posted jobs.
 
     POST:
-    - Clients/Advertisers: Create a job. Job will be inactive until payment is made.
+    - Clients/Advertisers: create a job. It will be inactive until paid.
     """
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -25,6 +27,7 @@ class JobListCreateView(generics.ListCreateAPIView):
             return Job.objects.filter(client=user).order_by('-created_at')
 
         if user.role == 'fundi':
+            # Trial period = 7 days after registration
             in_trial = (timezone.now() - user.date_joined) <= timedelta(days=7)
 
             latest_payment = Payment.objects.filter(
@@ -51,7 +54,7 @@ class JobListCreateView(generics.ListCreateAPIView):
 
 class MyJobListView(generics.ListAPIView):
     """
-    GET: List jobs posted by the authenticated user.
+    GET: List jobs posted by the logged-in user (client/advertiser).
     """
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -62,11 +65,9 @@ class MyJobListView(generics.ListAPIView):
 
 class JobRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     """
-    GET: Retrieve a job by ID.
-
-    PUT/PATCH: Update a job (must be owner).
-
-    DELETE: Delete a job (must be owner).
+    GET: View specific job.
+    PUT/PATCH: Update job (must be the owner).
+    DELETE: Delete job (must be the owner).
     """
     queryset = Job.objects.all()
     serializer_class = JobSerializer

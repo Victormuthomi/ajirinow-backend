@@ -22,7 +22,6 @@ class Ad(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)  # Changed to False by default
-    payment = models.ForeignKey(Payment, null=True, blank=True, on_delete=models.SET_NULL)
 
     def save(self, *args, **kwargs):
         # Automatically deactivate if expired

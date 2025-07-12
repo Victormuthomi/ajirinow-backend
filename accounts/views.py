@@ -1,5 +1,6 @@
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions
@@ -80,7 +81,7 @@ class FundiDeleteView(APIView):
 
 class FundiPublicList(APIView):
     """
-    List all visible fundis (on trial or subscribed in the last 30 days).
+    list all visible fundis (on trial or subscribed in the last 30 days).
     """
     def get(self, request):
         now = timezone.now()
@@ -90,21 +91,21 @@ class FundiPublicList(APIView):
         for profile in profiles:
             user = profile.user
 
-            # ✅ 1. If still on trial, and trial is not expired
+            # ✅ 1. if still on trial, and trial is not expired
             if user.on_trial and user.trial_ends and user.trial_ends >= now:
                 visible_fundis.append(profile)
                 continue
 
-            # ✅ 2. If trial has expired, deactivate on_trial
+            # ✅ 2. if trial has expired, deactivate on_trial
             if user.on_trial and user.trial_ends and user.trial_ends < now:
                 user.on_trial = False
                 user.save()
 
-            # ✅ 3. Check if payment was made in the last 30 days
+            # ✅ 3. check if payment was made in the last 30 days
             last_payment = Payment.objects.filter(
                 user=user,
                 purpose='subscription',
-                status='Completed'
+                status='completed'
             ).order_by('-created_at').first()
 
             if last_payment and (now - last_payment.created_at) <= timedelta(days=30):
@@ -119,7 +120,7 @@ class FundiPublicList(APIView):
                 "location": profile.location,
                 "rate_note": profile.rate_note,
                 "is_available": profile.is_available,
-                "phone_number": profile.user.phone_number if profile.show_contact else None,
+                "phone_number": profile.user.phone_number if profile.show_contact else none,
             })
         return Response(data)
 
@@ -140,6 +141,26 @@ class FundiPublicDetail(APIView):
             "phone_number": user.phone_number if profile.show_contact else None,
         }
         return Response(data)
+
+class ResetPasswordView(APIView):
+    """
+    Reset password using phone number and national ID number.
+    """
+    def post(self, request):
+        phone = request.data.get("phone_number")
+        id_number = request.data.get("id_number")
+        new_password = request.data.get("new_password")
+
+        if not (phone and id_number and new_password):
+            return Response({"error": "All fields are required"}, status=400)
+
+        try:
+            user = User.objects.get(phone_number=phone, id_number=id_number)
+            user.password = make_password(new_password)
+            user.save()
+            return Response({"message": "Password reset successful"}, status=200)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid phone number or ID number"}, status=400)
 
 
 class ClientRegisterView(generics.CreateAPIView):

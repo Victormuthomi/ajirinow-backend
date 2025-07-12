@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import RegisterView,LoginView,FundiProfileView,FundiDeleteView,FundiPublicList,FundiPublicDetail,ClientRegisterView,ClientLoginView,ClientListView,ClientMeView
+from .views import RegisterView,LoginView,FundiProfileView,FundiDeleteView,FundiPublicList,FundiPublicDetail,ClientRegisterView,ClientLoginView,ClientListView,ClientMeView, ResetPasswordView
+
 
 urlpatterns = [
         #fundi urls
@@ -9,6 +10,8 @@ urlpatterns = [
     path('fundis/me/delete/', FundiDeleteView.as_view()),
     path('fundis/', FundiPublicList.as_view()),
     path('fundis/<int:pk>/', FundiPublicDetail.as_view()),
+    path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
+
 
     #client urls
     path('clients/register/', ClientRegisterView.as_view(), name='client-register'),

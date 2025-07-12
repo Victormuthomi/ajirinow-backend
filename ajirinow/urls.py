@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/jobs/', include('jobs.urls')),
     path('api/ads/', include('ads.urls')),
     path('api/mpesa/', include('mpesa.urls')),
+     path('api/payments/', include('payments.urls')),
 
     # 🔹 Swagger UI & ReDoc
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

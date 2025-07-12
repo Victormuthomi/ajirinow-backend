@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 
-from .utils import lipa_na_mpesa_online
+
 from payments.models import Payment
 from jobs.models import Job
 from ads.models import Ad
@@ -129,4 +131,27 @@ def mpesa_callback(request):
         pass  # Optionally log this
 
     return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def job_payment_status(request):
+    job_id = request.GET.get("job_id")
+    if not job_id:
+        return Response({"error": "job_id is required"}, status=400)
+
+    try:
+        job = Job.objects.get(id=job_id, client=request.user)
+
+        if job.payment:
+            return Response({
+                "status": job.payment.status,
+                "purpose": job.payment.purpose,
+                "post_expiry_date": job.payment.post_expiry_date,
+            })
+        else:
+            return Response({"status": "Pending"})
+
+    except Job.DoesNotExist:
+        return Response({"status": "NotFound"}, status=404)
 

@@ -6,7 +6,6 @@ from .serializers import AdSerializer
 class AdListCreateView(generics.ListCreateAPIView):
     """
     GET: List all active ads.
-
     POST: Create a new ad (authenticated users only).
     """
     queryset = Ad.objects.all()
@@ -15,6 +14,9 @@ class AdListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class MyAdsView(generics.ListAPIView):
@@ -29,11 +31,13 @@ class MyAdsView(generics.ListAPIView):
             return Ad.objects.none()
         return Ad.objects.filter(client=self.request.user)
 
+    def get_serializer_context(self):
+        return {'request': self.request}
+
 
 class AdDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     GET: View a single ad.
-
     PUT/PATCH/DELETE: Update or delete an ad (only by owner).
     """
     serializer_class = AdSerializer
@@ -43,4 +47,7 @@ class AdDetailView(generics.RetrieveUpdateDestroyAPIView):
         if getattr(self, 'swagger_fake_view', False):
             return Ad.objects.none()
         return Ad.objects.filter(client=self.request.user)
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
