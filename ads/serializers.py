@@ -15,6 +15,7 @@ class AdSerializer(serializers.ModelSerializer):
             'description',
             'image',  # ✅ Will be returned as full URL now
             'link',
+            'is_active',
             'created_at',
             'expires_at'
         ]

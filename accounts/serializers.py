@@ -7,6 +7,8 @@ class FundiProfileSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField(source="user.is_active", read_only=True)
     subscription_end = serializers.DateField(source="user.subscription_end", read_only=True)
     phone_number = serializers.CharField(source="user.phone_number", read_only=True)
+    is_subscribed = serializers.BooleanField(source="user.is_subscribed", read_only=True)
+
 
     # ✅ Trial-related
     on_trial = serializers.BooleanField(source="user.on_trial", read_only=True)
@@ -26,6 +28,7 @@ class FundiProfileSerializer(serializers.ModelSerializer):
             'is_active',
             'subscription_end',
             'on_trial',
+            'is_subscribed',
             'trial_ends',
         ]
 
@@ -79,3 +82,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+class ClientMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['name', 'phone_number']

@@ -100,6 +100,10 @@ class FundiPublicList(APIView):
             if user.on_trial and user.trial_ends and user.trial_ends < now:
                 user.on_trial = False
                 user.save()
+            # After checking trial expiry
+            if user.subscription_end and user.subscription_end < timezone.now().date():
+                user.is_subscribed = False
+                user.save()
 
             # ✅ 3. check if payment was made in the last 30 days
             last_payment = Payment.objects.filter(

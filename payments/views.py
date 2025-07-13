@@ -155,3 +155,13 @@ def job_payment_status(request):
     except Job.DoesNotExist:
         return Response({"status": "NotFound"}, status=404)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def ad_payment_status(request):
+    ad_id = request.GET.get('ad_id')
+    try:
+        ad = Ad.objects.get(id=ad_id, client=request.user)
+        status = 'completed' if ad.payment and ad.payment.status == 'Completed' else 'pending'
+        return Response({'status': status})
+    except Ad.DoesNotExist:
+        return Response({'status': 'not_found'}, status=404)

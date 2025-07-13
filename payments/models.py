@@ -37,6 +37,7 @@ class Payment(models.Model):
         if self.status == "Completed":
             if self.purpose == "subscription" and self.user.role == "fundi":
                 self.user.subscription_end = timezone.now().date() + timedelta(days=30)
+                self.user.is_subscribed = True
                 self.user.save()
             elif self.purpose == "post_job":
                 self.post_expiry_date = timezone.now().date() + timedelta(weeks=12)

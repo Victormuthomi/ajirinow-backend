@@ -11,11 +11,11 @@ from payments.models import Payment
 class JobListCreateView(generics.ListCreateAPIView):
     """
     GET:
-    - Fundis (with active subscription or trial): view all active jobs.
-    - Clients/Advertisers: view only their own posted jobs.
+    - Fundis (with active subscription or trial): View all active jobs.
+    - Clients/Advertisers: View all active jobs.
 
     POST:
-    - Clients/Advertisers: create a job. It will be inactive until paid.
+    - Clients/Advertisers: Create a job. Job will be inactive until payment is made.
     """
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -23,17 +23,18 @@ class JobListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
 
+        # Allow clients and advertisers to view all active jobs
         if user.role in ['client', 'advertiser']:
-            return Job.objects.filter(client=user).order_by('-created_at')
+            return Job.objects.filter(is_active=True).order_by('-created_at')
 
+        # Fundis need to have a trial or active subscription
         if user.role == 'fundi':
-            # Trial period = 7 days after registration
             in_trial = (timezone.now() - user.date_joined) <= timedelta(days=7)
 
             latest_payment = Payment.objects.filter(
                 user=user,
                 purpose='subscription',
-                status='Completed'
+                status='completed'
             ).order_by('-created_at').first()
 
             has_active_subscription = (
@@ -54,7 +55,8 @@ class JobListCreateView(generics.ListCreateAPIView):
 
 class MyJobListView(generics.ListAPIView):
     """
-    GET: List jobs posted by the logged-in user (client/advertiser).
+    GET:
+    - List jobs posted by the logged-in user (client or advertiser).
     """
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -65,9 +67,14 @@ class MyJobListView(generics.ListAPIView):
 
 class JobRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     """
-    GET: View specific job.
-    PUT/PATCH: Update job (must be the owner).
-    DELETE: Delete job (must be the owner).
+    GET:
+    - View specific job by ID.
+
+    PUT/PATCH:
+    - Update a job (only if you are the owner).
+
+    DELETE:
+    - Delete a job (only if you are the owner).
     """
     queryset = Job.objects.all()
     serializer_class = JobSerializer
