@@ -1,7 +1,7 @@
 from django.db import models
-from accounts.models import User
 from django.utils import timezone
 from datetime import timedelta
+from accounts.models import User
 from payments.models import Payment
 
 # Define the upload path for ad images
@@ -18,18 +18,28 @@ class Ad(models.Model):
         null=True,
         help_text="Optional image file (JPG, PNG, etc.)"
     )
-    link = models.URLField(blank=True, help_text="Optional link to a product or site")
+    link = models.URLField(
+        blank=True,
+        help_text="Optional link to a product or site"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
-    is_active = models.BooleanField(default=False)  # Changed to False by default
-
+    is_active = models.BooleanField(default=False)  # Initially inactive
     payment = models.ForeignKey(Payment, null=True, blank=True, on_delete=models.SET_NULL)
+
+    def activate(self):
+        """
+        Activates the ad by setting is_active=True and setting expiry to 7 days from now.
+        Should be called after successful payment.
+        """
+        self.is_active = True
+        self.expires_at = timezone.now() + timedelta(days=7)
+        self.save()
 
     def save(self, *args, **kwargs):
         # Automatically deactivate if expired
         if self.expires_at and self.expires_at < timezone.now():
             self.is_active = False
-
         super().save(*args, **kwargs)
 
     def __str__(self):

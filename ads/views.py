@@ -3,14 +3,21 @@ from .models import Ad
 from .serializers import AdSerializer
 
 
+from django.utils import timezone
+
 class AdListCreateView(generics.ListCreateAPIView):
-    """
-    GET: List all active ads.
-    POST: Create a new ad (authenticated users only).
-    """
     queryset = Ad.objects.all()
     serializer_class = AdSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        # Deactivate expired ads before returning
+        expired_ads = Ad.objects.filter(is_active=True, expires_at__lt=timezone.now())
+        for ad in expired_ads:
+            ad.is_active = False
+            ad.save()
+
+        return Ad.objects.filter(is_active=True)
 
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
