@@ -81,15 +81,6 @@ class STKPushView(APIView):
 @csrf_exempt
 @api_view(['POST'])
 def mpesa_callback(request):
-    """
-    POST: Receives M-Pesa callback from Safaricom and updates the payment status.
-
-    Triggered by Safaricom once the STK push is approved or rejected.
-
-    Updates:
-    - Payment status
-    - Activates job/ad/subscription if successful
-    """
     data = request.data
     body = data.get('Body', {}).get('stkCallback', {})
     merchant_request_id = body.get('MerchantRequestID')
@@ -104,7 +95,7 @@ def mpesa_callback(request):
         )
 
         if result_code == 0:
-            # Get paid amount from callback metadata
+            # ✅ Set payment as completed — DO THIS HERE!
             amount = next(
                 (item['Value'] for item in body.get('CallbackMetadata', {}).get('Item', []) if item['Name'] == 'Amount'),
                 payment.amount
@@ -114,10 +105,12 @@ def mpesa_callback(request):
             payment.description = result_desc
             payment.save()
 
-            # Apply logic after successful payment
+            # ❗️DO NOT manually set user.is_subscribed here
+
+            # Activate stuff based on purpose
             if payment.purpose == 'subscription' and payment.user.role == 'fundi':
-                payment.user.subscription_end = timezone.now().date() + timedelta(days=30)
-                payment.user.save()
+                # No need to do anything — user.is_subscribed is calculated
+                pass
 
             elif payment.purpose == 'post_job':
                 job = Job.objects.filter(
@@ -125,7 +118,6 @@ def mpesa_callback(request):
                     is_active=False,
                     payment__isnull=True
                 ).order_by('-created_at').first()
-
                 if job:
                     job.payment = payment
                     job.is_active = True
@@ -146,7 +138,6 @@ def mpesa_callback(request):
             payment.save()
 
     except Payment.DoesNotExist:
-        # You can log this if needed
         pass
 
     return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})

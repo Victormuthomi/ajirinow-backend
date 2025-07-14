@@ -5,7 +5,6 @@ from rest_framework.exceptions import PermissionDenied
 
 from .models import Job
 from .serializers import JobSerializer
-from payments.models import Payment
 
 
 class JobListCreateView(generics.ListCreateAPIView):
@@ -23,28 +22,12 @@ class JobListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        # Allow clients and advertisers to view all active jobs
         if user.role in ['client', 'advertiser']:
             return Job.objects.filter(is_active=True).order_by('-created_at')
 
-        # Fundis need to have a trial or active subscription
         if user.role == 'fundi':
-            in_trial = (timezone.now() - user.date_joined) <= timedelta(days=7)
-
-            latest_payment = Payment.objects.filter(
-                user=user,
-                purpose='subscription',
-                status='completed'
-            ).order_by('-created_at').first()
-
-            has_active_subscription = (
-                latest_payment and
-                latest_payment.created_at >= timezone.now() - timedelta(days=30)
-            )
-
-            if not in_trial and not has_active_subscription:
+            if not user.is_on_trial and not user.is_subscribed:
                 raise PermissionDenied("Subscription required to view jobs.")
-
             return Job.objects.filter(is_active=True).order_by('-created_at')
 
         return Job.objects.none()

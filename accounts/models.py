@@ -1,7 +1,7 @@
+from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
-from datetime import timedelta
 
 class UserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
@@ -32,14 +32,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
-    is_subscribed = models.BooleanField(default=False)
 
-    subscription_end = models.DateField(null=True, blank=True)
-
-    # ✅ Trial-related fields
-    on_trial = models.BooleanField(default=True)
+    # Trial & Subscription
     trial_started = models.DateTimeField(null=True, blank=True)
     trial_ends = models.DateTimeField(null=True, blank=True)
+    subscription_end = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['name', 'role']
@@ -48,6 +45,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.name} ({self.role})"
+
+    @property
+    def is_on_trial(self):
+        return self.trial_ends and timezone.now() <= self.trial_ends
+
+    @property
+    def is_subscribed(self):
+        return self.subscription_end and timezone.now() <= self.subscription_end
 
 class FundiProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='fundi_profile')
@@ -67,7 +72,7 @@ class ClientProfile(models.Model):
     def __str__(self):
         return f"Client Profile: {self.user.name}"
 
-# ✅ Signal to auto-create profiles and set trial
+# Signal to create profile and setup trial
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -78,7 +83,6 @@ def create_user_profile(sender, instance, created, **kwargs):
             FundiProfile.objects.create(user=instance)
             instance.trial_started = timezone.now()
             instance.trial_ends = instance.trial_started + timedelta(days=7)
-            instance.on_trial = True
             instance.save()
         elif instance.role == 'client':
             ClientProfile.objects.create(user=instance)
