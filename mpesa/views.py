@@ -120,17 +120,17 @@ def mpesa_callback(request):
                 ).order_by('-created_at').first()
                 if job:
                     job.payment = payment
-                    job.is_active = True
-                    job.expires_at = timezone.now() + timedelta(weeks=12)
                     job.save()
+                    job.activate()
+
 
             elif payment.purpose == 'post_ad':
                 ad = Ad.objects.filter(client=payment.user, is_active=False, payment__isnull=True).order_by('-created_at').first()
                 if ad:
                     ad.payment = payment
-                    ad.is_active = True
-                    ad.expires_at = timezone.now() + timedelta(days=7)
                     ad.save()
+                    ad.activate()
+
 
         else:
             payment.status = 'Failed'
