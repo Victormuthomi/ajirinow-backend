@@ -1,2 +1,2 @@
-web: gunicorn ajirinow-backend.wsgi
+gunicorn ajirinow.wsgi
 
