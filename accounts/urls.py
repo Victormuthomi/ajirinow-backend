@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView,LoginView,FundiProfileView,FundiDeleteView,FundiPublicList,FundiPublicDetail,ClientRegisterView,ClientLoginView,ClientListView,ClientMeView, ResetPasswordView
+from .views import RegisterView,LoginView,FundiProfileView,FundiDeleteView,FundiPublicList,FundiPublicDetail,ClientRegisterView,ClientLoginView,ClientListView,ClientMeView, FundiResetPasswordView, ClientResetPasswordView
 
 
 urlpatterns = [
@@ -10,7 +10,7 @@ urlpatterns = [
     path('fundis/me/delete/', FundiDeleteView.as_view()),
     path('fundis/', FundiPublicList.as_view()),
     path('fundis/<int:pk>/', FundiPublicDetail.as_view()),
-    path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
+    path('reset-password/', FundiResetPasswordView.as_view(), name='reset-password'),
 
 
     #client urls
@@ -18,5 +18,6 @@ urlpatterns = [
     path('clients/login/', ClientLoginView.as_view(), name='client-login'),
     path('clients/', ClientListView.as_view(), name='client-list'),
     path('clients/me/', ClientMeView.as_view(), name='client-me'),
+     path('clients/reset-password/', ClientResetPasswordView.as_view(), name='client-reset-password'),
 ]
 

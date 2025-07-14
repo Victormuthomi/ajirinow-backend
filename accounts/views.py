@@ -122,7 +122,7 @@ class FundiPublicDetail(APIView):
         })
 
 
-class ResetPasswordView(APIView):
+class FundiResetPasswordView(APIView):
     def post(self, request):
         phone = request.data.get("phone_number")
         id_number = request.data.get("id_number")
@@ -171,4 +171,22 @@ class ClientMeView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return self.request.user
+
+class ClientResetPasswordView(APIView):
+    def post(self, request):
+        phone = request.data.get("phone_number")
+        id_number = request.data.get("id_number")
+        new_password = request.data.get("new_password")
+
+        if not (phone and id_number and new_password):
+            return Response({"error": "All fields are required"}, status=400)
+
+        try:
+            user = User.objects.get(phone_number=phone, id_number=id_number, role='client')
+            user.password = make_password(new_password)
+            user.save()
+            return Response({"message": "Password reset successful"}, status=200)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid phone number or ID number"}, status=400)
+
 
