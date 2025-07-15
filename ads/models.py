@@ -3,6 +3,7 @@ from django.utils import timezone
 from datetime import timedelta
 from accounts.models import User
 from payments.models import Payment
+from cloudinary.models import CloudinaryField
 
 # Define the upload path for ad images
 def ad_image_upload_path(instance, filename):
@@ -12,12 +13,8 @@ class Ad(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ads')
     title = models.CharField(max_length=100)
     description = models.TextField()
-    image = models.ImageField(
-        upload_to=ad_image_upload_path,
-        blank=True,
-        null=True,
-        help_text="Optional image file (JPG, PNG, etc.)"
-    )
+    image = CloudinaryField('image', blank=True, null=True)
+
     link = models.URLField(
         blank=True,
         help_text="Optional link to a product or site"
