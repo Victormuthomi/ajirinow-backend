@@ -13,7 +13,7 @@ class Ad(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ads')
     title = models.CharField(max_length=100)
     description = models.TextField()
-    image = CloudinaryField('image', blank=True, null=True)
+    image = CloudinaryField('image', blank=False, null=False)
 
     link = models.URLField(
         blank=True,

@@ -25,6 +25,6 @@ class AdSerializer(serializers.ModelSerializer):
     def get_image_url(self, obj):
         request = self.context.get('request')
         if obj.image and request:
-            return request.build_absolute_uri(obj.image.url)
+            return request.build_absolute_uri(obj.image.url).replace('http://', 'https://')
         return None
 
