@@ -74,6 +74,7 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 - **Ad**(id, business_user_id FK, title, body, status ∈ {pending_payment, active, expired}, created_at)
 - **Payment**(id, type ∈ {SUBSCRIPTION, JOB_POST, AD}, amount, currency, status ∈ {pending, success, failed}, gateway="mpesa", gateway_ref, user_id FK, object_ref (job/ad/subscription), created_at)
 ```
+----
 ## 🔐 Environment Variables
 
 # Django
@@ -144,7 +145,7 @@ docker-compose exec web python manage.py migrate
 5) On **success**:
    - Subscription: mark fundi active, set `current_period_end`
    - Job/Ad: mark **active/published**
-
+---
 
 ## 🔗 API Quickstart
 
@@ -194,7 +195,7 @@ Authorization: Bearer <access>
 - Jobs: client creates job → pending until payment callback → becomes active
 - Ads: business creates ad → pending until payment callback → becomes active
 - Payments: verify records saved with gateway refs; idempotent callbacks
-
+---
 ## 🔮 Roadmap
 
 - Automated tests (pytest/DRF) + dockerized test runner
