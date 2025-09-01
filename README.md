@@ -213,6 +213,81 @@ Authorization: Bearer <access>
 }
 ```
 → job is pending_payment` until M-Pesa callback marks it active
+
+---
+## 📋 Features
+
+- **Fundi Directory**
+  - Fundis can register and log in.
+  - 7-day free trial upon registration.
+  - Monthly subscription required to remain listed.
+  - Public directory with filtering (by trade/skills).
+
+- **Jobs**
+  - Clients can register and log in.
+  - Clients can post jobs (after payment).
+  - Fundis with active subscriptions can browse jobs.
+  - Jobs can be filtered (e.g., by location, trade).
+
+- **Ads**
+  - Construction-related businesses can post ads.
+  - Ads go live only after successful payment.
+
+- **Payments**
+  - Integrated with **M-Pesa STK Push**.
+  - Subscriptions, jobs, and ads are tied to payment status.
+  - Automatic update via M-Pesa callback.
+
+- **Authentication**
+  - JWT-based authentication with access/refresh tokens.
+---
+## 📡 API Documentation
+
+Interactive API docs are available via Swagger:
+
+```
+http://localhost:8000/api/swagger-docs/
+```
+
+This includes all endpoints, request/response formats, and authentication flow.
+
+---
+## 🚀 Deployment
+
+### Docker (Local / Production)
+Build and run the app with Docker:
+
+```bash
+docker build -t ajirinow-backend .
+docker run -d -p 8000:8000 --env-file .env ajirinow-backend
+```
+
+Or with Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+### Render Deployment
+1. Push your code to GitHub.
+2. Connect your repo to **Render**.
+3. Create a **Web Service**:
+   - Runtime: **Docker**
+   - Build Command: *(leave empty, Render uses Dockerfile)*
+   - Start Command: *(from Dockerfile, e.g. `gunicorn ajirinow.wsgi:application --bind 0.0.0.0:8000`)*
+4. Add environment variables from `.env`.
+5. Add a **PostgreSQL Database** on Render and update `DATABASE_URL`.
+6. Configure **M-Pesa callback URL** in Safaricom dashboard:
+   ```
+   https://<your-render-service>.onrender.com/api/payments/mpesa/callback
+   ```
+
+### Migrations
+Run Django migrations after deployment:
+
+```bash
+python manage.py migrate
+```
 ---
 ## ✅ Manual Test Checklist
 
@@ -233,3 +308,9 @@ Authorization: Bearer <access>
 - Advanced search & filters (skills, location, availability)
 - Admin dashboard (payments, churn, active subscriptions)
 - Observability: structured logs, basic metrics, request IDs
+---
+## 📄 License
+
+This project is **proprietary and not open source**.  
+All rights reserved © [Muthomi Victor / Ajirinow], 2025.  
+Unauthorized copying, distribution, or modification is prohibited.
