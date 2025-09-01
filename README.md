@@ -77,32 +77,32 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 ----
 ## 🔐 Environment Variables
 
-# Django
+** Django**
 SECRET_KEY=
 DEBUG=1
 ALLOWED_HOSTS=*
 
-# DB
+** DB**
 DATABASE_URL=postgres://user:pass@localhost:5432/ajirinow
-# OR individual:
+** OR individual: **
 DB_NAME=ajirinow
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 
-# JWT
+**JWT**
 JWT_ACCESS_TTL=15m
 JWT_REFRESH_TTL=7d
 
-# M-Pesa (STK Push)
+**M-Pesa (STK Push)**
 MPESA_CONSUMER_KEY=
 MPESA_CONSUMER_SECRET=
 MPESA_PASSKEY=
 MPESA_SHORTCODE=
 MPESA_CALLBACK_URL=https://your-domain.com/api/payments/mpesa/callback
 
-# App
+**App**
 TIME_ZONE=Africa/Nairobi
 
 ## ⚙️ Local Setup
