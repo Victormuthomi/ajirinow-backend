@@ -58,45 +58,29 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 
 ## 📐 Architecture
 
-## 📐 Architecture
+## 🔄 Fundi Subscription Flow
 
 ```mermaid
-flowchart TD
+sequenceDiagram
+  participant F as Fundi
+  participant A as Auth Service
+  participant S as Subscription Service
+  participant P as Payment Service
+  participant D as Database
 
-subgraph Users
-  U1[Fundi]
-  U2[Client]
-  U3[Business]
-end
+  F->>A: Register/Login
+  A->>D: Create user + trial status
+  F->>S: Listed in public directory (7-day free)
+  Note over F,S: Fundi can browse jobs during trial
 
-subgraph Backend["AjiriNow Backend (Django REST + PostgreSQL)"]
-  S1[Auth Service\nJWT: Register/Login/Refresh]
-  S2[Directory & Subscription Service\nTrial/Status/Listing]
-  S3[Job Service\nCreate/Pay/Activate/Browse/Apply]
-  S4[Ads Service\nCreate/Pay/Publish]
-  S5[Payment Service\nM-Pesa STK Push/Webhook]
-  DB[(PostgreSQL)]
-end
+  F->>S: Attempt to access after trial
+  S->>F: "Subscription expired"
 
-U1 -->|Register/Login| S1
-U2 -->|Register/Login| S1
-U3 -->|Register/Login| S1
+  F->>P: Initiate payment (M-Pesa)
+  P->>D: Confirm transaction
+  D-->>S: Update status = Active Subscriber
+  S-->>F: Access restored + listed
 
-U1 -->|View Listing / Access Jobs| S2
-S2 --> DB
-
-U2 -->|Post Job (Paid)| S3
-S3 --> S5
-S3 --> DB
-
-U3 -->|Post Ad (Paid)| S4
-S4 --> S5
-S4 --> DB
-
-U1 -->|Subscribe (Paid)| S2
-S2 --> S5
-
-S5 -->|Record Payment + Update Status| DB
 
 ---
 
