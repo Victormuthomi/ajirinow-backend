@@ -104,16 +104,27 @@ TIME_ZONE=Africa/Nairobi
 
 ## ⚙️ Local Setup
 
+```bash
+# Clone the repository
 git clone https://github.com/<you>/ajirinow.git
 cd ajirinow
 
+# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+source venv/bin/activate   # On Windows: venv\Scripts\activate
 
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure environment
 cp .env.example .env
+
+# Run migrations
 python manage.py migrate
+
+# Start the development server
 python manage.py runserver
+
 
 **admin (optional)**
 python manage.py createsuperuser
@@ -125,7 +136,8 @@ docker-compose up --build
 
 **Apply migrations inside the container (if needed)**
 docker-compose exec web python manage.py migrate
-
+```
+---
 
 **💸 Payments (M-Pesa)**
 
