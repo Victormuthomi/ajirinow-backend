@@ -59,19 +59,6 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 ---
 ## 📐 Architecture
 
-Users (Fundis, Clients, Businesses)
-        |
-        v
-   [Django REST API]
-        |
- --------------------------------------------------
- |   Auth   | Subscriptions | Jobs | Ads | Payments |
- --------------------------------------------------
-        |
-   [PostgreSQL DB]
-        |
-     [M-Pesa API]
-
 ---
 
 ## Part 6 — Data Model (quick sketch)
