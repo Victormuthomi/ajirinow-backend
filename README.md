@@ -58,6 +58,8 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 
 ## 📐 Architecture
 
+## 📐 Architecture
+
 ```mermaid
 flowchart TD
 
@@ -94,8 +96,8 @@ S4 --> DB
 U1 -->|Subscribe (Paid)| S2
 S2 --> S5
 
-S5 -->|Record Payment + Update Status| DB 
-```
+S5 -->|Record Payment + Update Status| DB
+
 ---
 
 ## Part 6 — Data Model (quick sketch)
