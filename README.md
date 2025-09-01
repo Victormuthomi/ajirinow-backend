@@ -57,9 +57,6 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 - **Testing**: Manual (automated tests planned)
 
 ---
-## 📐 Architecture
-
----
 
 ## Part 6 — Data Model (quick sketch)
 
@@ -80,7 +77,7 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 ** Django**
 SECRET_KEY=
 DEBUG=1
-ALLOWED_HOSTS=*
+ALLOWED_HOSTS=**
 
 ** DB**
 DATABASE_URL=postgres://user:pass@localhost:5432/ajirinow
