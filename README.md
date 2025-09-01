@@ -160,15 +160,18 @@ docker-compose exec web python manage.py migrate
 
 ### Auth: Register (Fundi)
 POST /api/auth/register
-```json {
+```json
+{
   "email": "fundi@example.com",
   "password": "StrongPass!123",
   "role": "FUNDI"
-}```
+}
+```
 
 ### Auth: Login
 POST /api/auth/login
-```json {
+```
+json {
   "email": "fundi@example.com",
   "password": "StrongPass!123"
 }
@@ -177,7 +180,8 @@ POST /api/auth/login
 ### Fundi: My Access Status
 GET /api/fundis/me/access
 Authorization: Bearer <access>
-→ ```json { "trial_active": true, "subscription_active": false, "is_listed": true, "trial_end_at": "2025-09-08T12:00:00Z" } ```
+→ ```json 
+{ "trial_active": true, "subscription_active": false, "is_listed": true, "trial_end_at": "2025-09-08T12:00:00Z" }```
 
 ### Fundi: Start Subscription (initiate payment)
 POST /api/payments/subscription
@@ -193,9 +197,9 @@ Authorization: Bearer <access>
   "location": "Mru",
   "budget": 15000,
   "skills": ["plumbing"]
-} 
-→ job is pending_payment` until M-Pesa callback marks it active
+}
 ```
+→ job is pending_payment` until M-Pesa callback marks it active
 ---
 ## ✅ Manual Test Checklist
 
