@@ -56,31 +56,21 @@ Django REST backend for **AjiriNow** — a platform serving the fast-growing tow
 - **Deploy**: Render (Dockerized)
 - **Testing**: Manual (automated tests planned)
 
+---
 ## 📐 Architecture
 
-## 🔄 Fundi Subscription Flow
-
-```mermaid
-sequenceDiagram
-  participant F as Fundi
-  participant A as Auth Service
-  participant S as Subscription Service
-  participant P as Payment Service
-  participant D as Database
-
-  F->>A: Register/Login
-  A->>D: Create user + trial status
-  F->>S: Listed in public directory (7-day free)
-  Note over F,S: Fundi can browse jobs during trial
-
-  F->>S: Attempt to access after trial
-  S->>F: "Subscription expired"
-
-  F->>P: Initiate payment (M-Pesa)
-  P->>D: Confirm transaction
-  D-->>S: Update status = Active Subscriber
-  S-->>F: Access restored + listed
-
+Users (Fundis, Clients, Businesses)
+        |
+        v
+   [Django REST API]
+        |
+ --------------------------------------------------
+ |   Auth   | Subscriptions | Jobs | Ads | Payments |
+ --------------------------------------------------
+        |
+   [PostgreSQL DB]
+        |
+     [M-Pesa API]
 
 ---
 
