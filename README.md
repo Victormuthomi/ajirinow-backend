@@ -1,6 +1,6 @@
 # AjiriNow (Backend)
 
-Django REST backend for **AjiriNow** — a platform serving the fast-growing town of **Mru**, connecting **construction workers (fundis)** with **clients and businesses**.
+Django REST backend for **AjiriNow** — a platform serving the fast-growing town of **Meru**, connecting **construction workers (fundis)** with **clients and businesses**.
 
 **What it does**
 - Fundis get a **7-day free trial**, then pay a **monthly subscription (M-Pesa)** to appear on a public directory and **browse jobs**.
