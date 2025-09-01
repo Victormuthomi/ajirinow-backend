@@ -118,19 +118,19 @@ cp .env.example .env
 python manage.py migrate
 python manage.py runserver
 
-# admin (optional)
+**admin (optional)**
 python manage.py createsuperuser
 
-## 🐳 Docker
+** 🐳 Docker**
 
-# Build & run
+**Build & run**
 docker-compose up --build
 
-# Apply migrations inside the container (if needed)
+**Apply migrations inside the container (if needed)**
 docker-compose exec web python manage.py migrate
 
 
-## 💸 Payments (M-Pesa)
+**💸 Payments (M-Pesa)**
 
 - Uses **STK Push** for:
   - Fundi **subscriptions** (monthly)
