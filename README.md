@@ -160,41 +160,43 @@ docker-compose exec web python manage.py migrate
 
 ### Auth: Register (Fundi)
 POST /api/auth/register
-{
+```json {
   "email": "fundi@example.com",
   "password": "StrongPass!123",
   "role": "FUNDI"
-}
+}```
 
 ### Auth: Login
 POST /api/auth/login
-{
+```json {
   "email": "fundi@example.com",
   "password": "StrongPass!123"
 }
 → { "access": "...", "refresh": "..." }
-
+```
 ### Fundi: My Access Status
 GET /api/fundis/me/access
 Authorization: Bearer <access>
-→ { "trial_active": true, "subscription_active": false, "is_listed": true, "trial_end_at": "2025-09-08T12:00:00Z" }
+→ ```json { "trial_active": true, "subscription_active": false, "is_listed": true, "trial_end_at": "2025-09-08T12:00:00Z" } ```
 
 ### Fundi: Start Subscription (initiate payment)
 POST /api/payments/subscription
 Authorization: Bearer <access>
-→ { "payment_id": 101, "status": "pending", "mpesa_checkout_request_id": "..." }
+→ ```json{ "payment_id": 101, "status": "pending", "mpesa_checkout_request_id": "..." }```
 
 ### Client: Post Job (after payment)
 POST /api/jobs
 Authorization: Bearer <access>
+```json
 {
   "title": "Need 3 plumbers for 2 days",
   "location": "Mru",
   "budget": 15000,
   "skills": ["plumbing"]
-}
-→ job is `pending_payment` until M-Pesa callback marks it `active`
-
+} 
+→ job is pending_payment` until M-Pesa callback marks it active
+```
+---
 ## ✅ Manual Test Checklist
 
 - Auth: register/login (Fundi, Client, Business)
