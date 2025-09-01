@@ -312,5 +312,5 @@ python manage.py migrate
 ## 📄 License
 
 This project is **proprietary and not open source**.  
-All rights reserved © [Muthomi Victor / Ajirinow], 2025.  
+All rights reserved © Muthomi Victor / Ajirinow, 2025.  
 Unauthorized copying, distribution, or modification is prohibited.
